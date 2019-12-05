@@ -4,7 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+//used to efficiently find any prime factor p of an odd composite
+//number n for which p − 1 has only small prime divisors
 namespace Lab2_Cryptography
 {
     static class Program
