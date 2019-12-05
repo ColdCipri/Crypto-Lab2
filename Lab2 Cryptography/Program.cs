@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,107 +9,87 @@ namespace Lab2_Cryptography
 {
     static class Program
     {
-
-        static ulong gcd(ulong a, ulong b)
-        {
-            if (a == 0)
-                return b;
-            return gcd(b % a, a);
-        }
-
-        static ulong boundCheck(ulong a, ulong b)
-        {
-            ulong i = 1;
-           
-            while ((ulong)Math.Pow(a, i) <= b)
-            {
-                i++;
-            }
-
-            i--;
-            return (ulong)Math.Pow(a, i);
-        }
-
-        static bool isPrime(ulong n)
-        {
-            if (n <= 1)
-                return false;
-
-            for (ulong i = 2; i < n; i++)
-                if (n % i == 0)
-                    return false;
-
-            return true;
-        }
+        private static readonly Random random = new Random();
 
         static void Main(string[] args)
         {
-
-            int a;
-            ulong bound, n;
+            //varbiables
+            int a = 2;
+            ulong bound = 13, n = 1241143;
+            List<int> usedA = new List<int>();
+            String input;
             bool ok = true;
+
+            //input n
             while (ok)
             {
-
-                ulong k = 1;
-
-                Console.Write("Please input n:");
-                String input = Console.ReadLine();
-                n = (ulong)Convert.ToUInt64(input);
-
-                Console.Write("Please input bound:");
+                Console.Write("Please input n (by default it is set to 1241143):");
                 input = Console.ReadLine();
+
+                if (!string.IsNullOrEmpty(input))
+                    n = (ulong)Convert.ToUInt64(input);
+
+                if (n % 2 == 0)
+                    Console.WriteLine("The number is even, we need an odd number!");
+                else
+                    ok = false;
+            }
+
+            //input bound
+            Console.Write("Please input bound (by default it is set to 13):");
+            input = Console.ReadLine();
+
+            if (!string.IsNullOrEmpty(input))
                 bound = (ulong)Convert.ToUInt64(input);
 
-                Console.Write("Please input a:");
-                input = Console.ReadLine();
-                a = Convert.ToInt32(input);
+            ok = true;
 
+            while (ok)
+            {
+                ulong k = 1;
+                
+                //check if a is already in the list to not be used again
+                if (usedA.Contains(a))
+                    lock (random)
+                        a = random.Next(2, (int)n-1);
+                else
+                    usedA.Add(a);
+                
+                //creates the power k
                 ulong b = bound;
-
                 while (b > 1)
                 {
-                    if (isPrime(b))
+                    if (Utils.isPrime(b))
                     {
-                        k *= boundCheck(b, bound);
+                        k *= Utils.boundCheck(b, bound);
                     }
                     b--;
                 }
 
-                ulong nr = (ulong)Math.Pow(a, k) - 1;
+                ulong nr = Utils.binaryPow((ulong)a, k, n);
 
-                ulong gcdNr = gcd(nr, n);
+                ulong gcdNr = Utils.gcd(nr, n);
 
-                if ((gcdNr > 1 && gcdNr < n) && (isPrime(n/gcdNr)))
+                if ((gcdNr > 1 && gcdNr < n) && (Utils.isPrime(n / gcdNr)))
                 {
-                    Console.WriteLine(n + " = " + gcdNr + " * " + n / gcdNr);
-                }
-                else if ((gcdNr > 1 && gcdNr < n) && (!isPrime(n / gcdNr)))
-                {
-                    Console.WriteLine(n / gcdNr + " is not prime!");
-                }
-                else if (gcdNr == 1)
-                {
-                    Console.WriteLine("Failed!");
-                    Console.WriteLine("Greatest common divisor = 1");
-                }
-                else
-                {
-                    Console.WriteLine("Failed!");
-                    Console.WriteLine("Greatest common divisor = n");
-                }
-
-
-                
-                Console.WriteLine("Try again? 1/0");
-                input = Console.ReadLine();
-                if (input == "0")
+                    Console.WriteLine("\n" + n + " = " + gcdNr + " * " + n / gcdNr);
                     ok = false;
-                else if (input == "1")
-                    continue;
-                else
-                    throw new Exception("Invalid input! 1/0");
+                }
+                //else if (gcdNr == 1)
+                //{
+                //    Console.WriteLine("Failed!");
+                //    Console.WriteLine("Greatest common divisor = 1\n");
+                //}
+                //else
+                //{
+                //    Console.WriteLine("Failed!");
+                //    Console.WriteLine("Greatest common divisor = n\n");
+                //}
+
+
             }
+            Console.WriteLine("n = " + n + "\na = " + a + "\nB = " + bound);
+            Console.Read();
         }
     }
 }
